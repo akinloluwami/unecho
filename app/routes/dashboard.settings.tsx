@@ -1,6 +1,5 @@
 import { useState } from "react";
-import { Bell, Menu, Zap, Save, Key, Copy, Eye, EyeOff } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
+import { Zap, Save, Key, Copy, Eye, EyeOff } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import {
   Card,
@@ -34,6 +33,7 @@ import {
 } from "~/components/ui/table";
 import AppHeader from "~/components/app-header";
 import { toast } from "sonner";
+import { MetaFunction } from "@remix-run/react";
 
 export default function SettingsPage() {
   const [showApiKey, setShowApiKey] = useState(false);
@@ -327,3 +327,7 @@ export default function SettingsPage() {
     </div>
   );
 }
+
+export const meta: MetaFunction = () => {
+  return [{ title: "Settings | Unecho" }];
+};
