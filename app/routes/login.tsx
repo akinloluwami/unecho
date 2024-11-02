@@ -26,11 +26,8 @@ export default function LoginPage() {
 
   const handleGithubLogin = async () => {
     setIsLoading(true);
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-    setIsLoading(false);
-    // Here you would typically redirect to GitHub OAuth
-    console.log("GitHub login initiated");
+    const githubClientId = "Ov23liqBAP1Ll3kYfEAB";
+    window.location.href = `https://github.com/login/oauth/authorize?client_id=${githubClientId}&scope=user:email`;
   };
 
   return (
