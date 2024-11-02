@@ -1,4 +1,3 @@
-import React from "react";
 import AppHeader from "~/components/app-header";
 import { useState } from "react";
 import { MoreHorizontal } from "lucide-react";
@@ -26,7 +25,6 @@ import {
   TableHeader,
   TableRow,
 } from "~/components/ui/table";
-import { Badge } from "~/components/ui/badge";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -35,6 +33,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
+import { MetaFunction } from "@remix-run/react";
 
 const feedbackData = [
   {
@@ -220,3 +219,7 @@ const Feedback = () => {
 };
 
 export default Feedback;
+
+export const meta: MetaFunction = () => {
+  return [{ title: "Feedback | Unecho" }];
+};
