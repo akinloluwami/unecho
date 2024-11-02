@@ -1,6 +1,4 @@
-"use client";
-
-import { Link } from "@remix-run/react";
+import { Link, MetaFunction } from "@remix-run/react";
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
 import { SiGoogle, SiGithub } from "react-icons/si";
@@ -87,3 +85,7 @@ export default function LoginPage() {
     </div>
   );
 }
+
+export const meta: MetaFunction = () => {
+  return [{ title: "Login | Unecho" }];
+};
