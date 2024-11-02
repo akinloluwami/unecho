@@ -1,6 +1,6 @@
 import { Outlet } from "@remix-run/react";
 import { AppSidebar } from "~/components/app-sidebar";
-import { SidebarProvider, SidebarTrigger } from "~/components/ui/sidebar";
+import { SidebarProvider } from "~/components/ui/sidebar";
 
 const Dashboard = () => {
   return (
