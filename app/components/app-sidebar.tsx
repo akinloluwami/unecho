@@ -1,14 +1,5 @@
 import { Link, useLocation } from "@remix-run/react";
-import {
-  Calendar,
-  ChartSpline,
-  Gauge,
-  Home,
-  Inbox,
-  MessageSquare,
-  Search,
-  Settings,
-} from "lucide-react";
+import { ChartSpline, Gauge, MessageSquare, Settings } from "lucide-react";
 
 import {
   Sidebar,
@@ -21,7 +12,6 @@ import {
   SidebarMenuItem,
 } from "~/components/ui/sidebar";
 
-// Menu items.
 const items = [
   {
     title: "Dashboard",
@@ -52,13 +42,14 @@ export function AppSidebar() {
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel>Application</SidebarGroupLabel>
-          <SidebarGroupContent>
+          <SidebarGroupContent className="mt-10">
             <SidebarMenu>
               {items.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton
                     asChild
                     isActive={item.url === location.pathname}
+                    size="lg"
                   >
                     <Link to={item.url} viewTransition>
                       <item.icon />
