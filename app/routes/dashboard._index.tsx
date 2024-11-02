@@ -1,3 +1,4 @@
+import { MetaFunction } from "@remix-run/react";
 import {
   Legend,
   Line,
@@ -207,3 +208,7 @@ const DashboardIndex = () => {
 };
 
 export default DashboardIndex;
+
+export const meta: MetaFunction = () => {
+  return [{ title: "Dashboard | Unecho" }];
+};
