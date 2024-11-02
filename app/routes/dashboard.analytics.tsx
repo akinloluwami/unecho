@@ -1,30 +1,20 @@
-import { useState } from "react";
 import {
   BarChart,
   Bar,
   LineChart,
   Line,
-  PieChart,
-  Pie,
-  Cell,
   XAxis,
   YAxis,
-  CartesianGrid,
   Tooltip,
   Legend,
   ResponsiveContainer,
 } from "recharts";
 import {
-  Bell,
-  Menu,
   BarChart2,
   PieChart as PieChartIcon,
   TrendingUp,
   Calendar,
 } from "lucide-react";
-
-import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
-import { Button } from "~/components/ui/button";
 import {
   Card,
   CardContent,
@@ -32,17 +22,10 @@ import {
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "~/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import AppHeader from "~/components/app-header";
+import { MetaFunction } from "@remix-run/react";
 
-// Mock data for charts
 const sentimentTrendData = [
   { name: "Week 1", positive: 65, neutral: 25, negative: 10 },
   { name: "Week 2", positive: 60, neutral: 30, negative: 10 },
@@ -60,23 +43,12 @@ const feedbackVolumeData = [
   { name: "Sun", volume: 130 },
 ];
 
-const feedbackCategoryData = [
-  { name: "UI/UX", value: 400 },
-  { name: "Performance", value: 300 },
-  { name: "Features", value: 300 },
-  { name: "Bugs", value: 200 },
-];
-
-const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"];
-
 export default function AnalyticsPage() {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-
   return (
     <div className="">
       <AppHeader title="Analytics" />
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Summary Cards */}
+        {" "}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -135,7 +107,6 @@ export default function AnalyticsPage() {
             </CardContent>
           </Card>
         </div>
-
         {/* Charts */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
           <Card>
@@ -193,7 +164,6 @@ export default function AnalyticsPage() {
             </CardContent>
           </Card>
         </div>
-
         <Card>
           <CardHeader>
             <CardTitle>Top Feedback</CardTitle>
@@ -256,3 +226,7 @@ export default function AnalyticsPage() {
     </div>
   );
 }
+
+export const meta: MetaFunction = () => {
+  return [{ title: "Analytics | Unecho" }];
+};
