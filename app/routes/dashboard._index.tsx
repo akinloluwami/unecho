@@ -31,16 +31,6 @@ import { getCookie } from "~/lib/cookies";
 import { getFeedbackSentimentData } from "~/services/analytics/getFeedbackSentimentData";
 import { getWeeklyFeedbackChartData } from "~/services/analytics/getWeeklyFeedbackChartData";
 
-const chartData = [
-  { name: "Mon", positive: 4, neutral: 3, negative: 2 },
-  { name: "Tue", positive: 3, neutral: 4, negative: 1 },
-  { name: "Wed", positive: 5, neutral: 2, negative: 3 },
-  { name: "Thu", positive: 6, neutral: 3, negative: 1 },
-  { name: "Fri", positive: 4, neutral: 4, negative: 2 },
-  { name: "Sat", positive: 3, neutral: 5, negative: 1 },
-  { name: "Sun", positive: 5, neutral: 3, negative: 2 },
-];
-
 const recentFeedback = [
   {
     id: 1,
@@ -87,7 +77,7 @@ export const loader: LoaderFunction = async ({ request }) => {
   const stat = await getFeedbackSentimentData(projectId, userId);
   const chartData = await getWeeklyFeedbackChartData(projectId, userId);
 
-  return json({ stat });
+  return json({ stat, chartData });
 };
 
 const DashboardIndex = () => {
@@ -106,9 +96,11 @@ const DashboardIndex = () => {
               <div className="bg-green-500 rounded-full size-4" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stat[0].percentage}%</div>
+              <div className="text-2xl font-bold">
+                {stat["positive"].percentage}%
+              </div>
               <p className="text-xs text-muted-foreground">
-                {stat[0].changeFromLastWeek || 0}% from last week
+                {stat["positive"].changeFromLastWeek || 0}% from last week
               </p>
             </CardContent>
           </Card>
@@ -120,9 +112,11 @@ const DashboardIndex = () => {
               <div className="bg-yellow-500 rounded-full size-4" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stat[1].percentage}%</div>
+              <div className="text-2xl font-bold">
+                {stat["neutral"].percentage}%
+              </div>
               <p className="text-xs text-muted-foreground">
-                {stat[1].changeFromLastWeek || 0}% from last week
+                {stat["neutral"].changeFromLastWeek || 0}% from last week
               </p>
             </CardContent>
           </Card>
@@ -134,9 +128,11 @@ const DashboardIndex = () => {
               <div className="bg-red-500 rounded-full size-4" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stat[2].percentage}%</div>
+              <div className="text-2xl font-bold">
+                {stat["negative"].percentage}%
+              </div>
               <p className="text-xs text-muted-foreground">
-                {stat[2].changeFromLastWeek || 0}% from last week from last week
+                {stat["negative"].changeFromLastWeek || 0}% from last week
               </p>
             </CardContent>
           </Card>
