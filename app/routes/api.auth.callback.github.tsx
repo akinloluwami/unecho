@@ -9,16 +9,14 @@ import dayjs from "dayjs";
 export const loader: LoaderFunction = async ({ request }) => {
   const url = new URL(request.url);
   const code = url.searchParams.get("code");
-
-  if (!code) {
+  if (!code)
     return json(
       { message: "Code query parameter is missing" },
       { status: 400 }
     );
-  }
 
   try {
-    const response = await axios.post(
+    const tokenResponse = await axios.post(
       "https://github.com/login/oauth/access_token",
       {
         client_id: process.env.GITHUB_CLIENT_ID,
@@ -27,73 +25,67 @@ export const loader: LoaderFunction = async ({ request }) => {
       }
     );
 
-    const accessToken = new URLSearchParams(response.data).get("access_token");
+    const accessToken = new URLSearchParams(tokenResponse.data).get(
+      "access_token"
+    );
+    if (!accessToken) return json({ message: "Unauthorized" }, { status: 401 });
 
-    if (accessToken) {
-      const octokit = new Octokit({ auth: accessToken });
+    const octokit = new Octokit({ auth: accessToken });
+    const { data: user } = await octokit.request("GET /user");
+    const emailData = await octokit.request("GET /user/emails");
+    const email = emailData.data.find((e) => e.primary)?.email || "";
 
-      const userResponse = await octokit.request("GET /user");
-      const userEmails = await octokit.request("GET /user/emails");
+    let userId: string;
+    let projectId: string;
 
-      const user = userResponse.data;
-      const email = userEmails.data.find((e) => e.primary)?.email;
-
-      const preparedData = {
-        email: email || "",
-        name: user.name || "",
-        githubId: user.id,
-      };
-
-      const existingUser = await prisma.user.findUnique({
-        where: { email },
+    const existingUser = await prisma.user.findUnique({ where: { email } });
+    if (existingUser) {
+      userId = existingUser.id;
+      const existingProject = await prisma.project.findFirst({
+        where: { userId },
       });
-
-      if (existingUser) {
-        const authToken = await createAuthToken(existingUser.id);
-        return redirect("/dashboard", {
-          headers: [
-            [
-              "Set-Cookie",
-              `unecho.auth-token=${authToken}; HttpOnly; Path=/; Max-Age=${dayjs()
-                .add(90, "days")
-                .unix()}`,
-            ],
-          ],
-        });
-      }
-
-      const newUser = await prisma.user.create({
-        data: {
-          email: preparedData.email,
-          name: preparedData.name,
-        },
-      });
-
-      await prisma.project.create({
-        data: {
-          name: `${preparedData.name}'s Project`,
-          secretKey: `sk_UE${generateApiKey()}`,
-          publicKey: `pk_UE${generateApiKey()}`,
-          userId: newUser.id,
-        },
-      });
-
-      const authToken = await createAuthToken(newUser.id);
-      return redirect("/dashboard", {
-        headers: [
-          [
-            "Set-Cookie",
-            `unecho.auth-token=${authToken}; HttpOnly; Path=/; Max-Age=${dayjs()
-              .add(90, "days")
-              .unix()}`,
-          ],
-        ],
-      });
-    } else {
-      return json({ message: "Unauthorized" }, { status: 401 });
+      projectId = existingProject?.id || "";
+      return setCookieAndRedirect(userId, projectId);
     }
+
+    const newUser = await prisma.user.create({
+      data: { email, name: user.name || "" },
+    });
+    userId = newUser.id;
+
+    const newProject = await prisma.project.create({
+      data: {
+        name: `${user.name || "New User"}'s Project`,
+        secretKey: `sk_UE${generateApiKey()}`,
+        publicKey: `pk_UE${generateApiKey()}`,
+        userId,
+      },
+    });
+    projectId = newProject.id;
+
+    return setCookieAndRedirect(userId, projectId);
   } catch (error) {
     console.error(error);
     return json({ message: "Something went wrong" }, { status: 500 });
   }
+};
+
+const setCookieAndRedirect = async (userId: string, projectId: string) => {
+  const authToken = await createAuthToken(userId);
+  return redirect("/dashboard", {
+    headers: [
+      [
+        "Set-Cookie",
+        `unecho.auth-token=${authToken}; HttpOnly; Path=/; Max-Age=${dayjs()
+          .add(90, "days")
+          .unix()}`,
+      ],
+      [
+        "Set-Cookie",
+        `unecho.project-id=${projectId}; Path=/; Max-Age=${dayjs()
+          .add(90, "days")
+          .unix()}`,
+      ],
+    ],
+  });
 };
