@@ -1,4 +1,6 @@
-import { MetaFunction } from "@remix-run/react";
+import { LoaderFunction, json } from "@remix-run/node";
+import { MetaFunction, useLoaderData } from "@remix-run/react";
+import { prisma } from "prisma/client";
 import {
   Legend,
   Line,
@@ -24,6 +26,10 @@ import {
   TableHeader,
   TableRow,
 } from "~/components/ui/table";
+import { getUserIdFromToken } from "~/lib/auth";
+import { getCookie } from "~/lib/cookies";
+import { getFeedbackSentimentData } from "~/services/analytics/getFeedbackSentimentData";
+import { getWeeklyFeedbackChartData } from "~/services/analytics/getWeeklyFeedbackChartData";
 
 const chartData = [
   { name: "Mon", positive: 4, neutral: 3, negative: 2 },
@@ -73,7 +79,20 @@ const recentFeedback = [
   },
 ];
 
+export const loader: LoaderFunction = async ({ request }) => {
+  const projectId = getCookie(request, "unecho.project-id")!;
+  const userToken = getCookie(request, "unecho.auth-token")!;
+  const userId = getUserIdFromToken(userToken)!;
+
+  const stat = await getFeedbackSentimentData(projectId, userId);
+  const chartData = await getWeeklyFeedbackChartData(projectId, userId);
+
+  return json({ stat });
+};
+
 const DashboardIndex = () => {
+  const { stat, chartData } = useLoaderData<typeof loader>();
+
   return (
     <div>
       <AppHeader title="Dashboard" />
@@ -87,9 +106,9 @@ const DashboardIndex = () => {
               <div className="bg-green-500 rounded-full size-4" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">65%</div>
+              <div className="text-2xl font-bold">{stat[0].percentage}%</div>
               <p className="text-xs text-muted-foreground">
-                +2% from last week
+                {stat[0].changeFromLastWeek || 0}% from last week
               </p>
             </CardContent>
           </Card>
@@ -101,9 +120,9 @@ const DashboardIndex = () => {
               <div className="bg-yellow-500 rounded-full size-4" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">25%</div>
+              <div className="text-2xl font-bold">{stat[1].percentage}%</div>
               <p className="text-xs text-muted-foreground">
-                -1% from last week
+                {stat[1].changeFromLastWeek || 0}% from last week
               </p>
             </CardContent>
           </Card>
@@ -115,9 +134,9 @@ const DashboardIndex = () => {
               <div className="bg-red-500 rounded-full size-4" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">10%</div>
+              <div className="text-2xl font-bold">{stat[2].percentage}%</div>
               <p className="text-xs text-muted-foreground">
-                -1% from last week
+                {stat[2].changeFromLastWeek || 0}% from last week from last week
               </p>
             </CardContent>
           </Card>
