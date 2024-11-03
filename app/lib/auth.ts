@@ -7,9 +7,19 @@ interface TokenPayload {
   id: string;
 }
 
-export async function createAuthToken(id: string): Promise<string> {
+export const createAuthToken = (id: string) => {
   const payload: TokenPayload = { id };
 
   const token = jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
   return token;
-}
+};
+
+export const getUserIdFromToken = (token: string): string | null => {
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET) as TokenPayload;
+    return decoded.id;
+  } catch (error) {
+    console.error("Error verifying token:", error);
+    return null;
+  }
+};
