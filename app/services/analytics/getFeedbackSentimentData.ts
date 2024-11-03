@@ -120,5 +120,16 @@ export const getFeedbackSentimentData = async (
 
   const adjustedSentimentData = adjustPercentagesToHundred(sentimentData);
 
-  return adjustedSentimentData;
+  const data = adjustedSentimentData.reduce(
+    (acc, item) => {
+      acc[item.sentiment] = {
+        percentage: item.percentage,
+        changeFromLastWeek: item.changeFromLastWeek,
+      };
+      return acc;
+    },
+    {} as Record<string, { percentage: number; changeFromLastWeek: number }>
+  );
+
+  return data;
 };
