@@ -13,6 +13,7 @@ export const getWeeklyFeedbackChartData = async (
     where: {
       project: {
         id: projectId,
+        userId,
       },
       createdAt: {
         gte: startOfWeek,
