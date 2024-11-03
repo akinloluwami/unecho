@@ -16,15 +16,16 @@ model User {
 }
 
 model Project {
-  id          String     @id @default(uuid())
-  name        String
-  description String?
-  createdAt   DateTime   @default(now())
-  userId      String
-  publicKey   String     @unique
-  secretKey   String     @unique
-  feedbacks   Feedback[]
-  user        User       @relation(fields: [userId], references: [id])
+  id                String              @id @default(uuid())
+  name              String
+  description       String?
+  createdAt         DateTime            @default(now())
+  userId            String
+  publicKey         String              @unique
+  secretKey         String              @unique
+  ClientUserProfile ClientUserProfile[]
+  feedbacks         Feedback[]
+  user              User                @relation(fields: [userId], references: [id])
 }
 
 model Feedback {
@@ -46,6 +47,8 @@ model ClientUserProfile {
   createdAt DateTime   @default(now())
   avatar    String?
   profileId String?
+  projectId String?
+  Project   Project?   @relation(fields: [projectId], references: [id])
   feedbacks Feedback[]
 }
 
