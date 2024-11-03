@@ -1,6 +1,10 @@
 import { LoaderFunction, redirect, json } from "@remix-run/node";
 import { Octokit } from "octokit";
 import axios from "axios";
+import { prisma } from "../../prisma/client";
+import { generateApiKey } from "~/lib/utils";
+import { createAuthToken } from "~/lib/auth";
+import dayjs from "dayjs";
 
 export const loader: LoaderFunction = async ({ request }) => {
   const url = new URL(request.url);
@@ -40,10 +44,50 @@ export const loader: LoaderFunction = async ({ request }) => {
         githubId: user.id,
       };
 
-      return redirect("/dashboard", {
-        headers: {
-          "Set-Cookie": `preparedData=${JSON.stringify(preparedData)}`,
+      const existingUser = await prisma.user.findUnique({
+        where: { email },
+      });
+
+      if (existingUser) {
+        const authToken = await createAuthToken(existingUser.id);
+        return redirect("/dashboard", {
+          headers: [
+            [
+              "Set-Cookie",
+              `unecho.auth-token=${authToken}; HttpOnly; Path=/; Max-Age=${dayjs()
+                .add(90, "days")
+                .unix()}`,
+            ],
+          ],
+        });
+      }
+
+      const newUser = await prisma.user.create({
+        data: {
+          email: preparedData.email,
+          name: preparedData.name,
         },
+      });
+
+      await prisma.project.create({
+        data: {
+          name: `${preparedData.name}'s Project`,
+          secretKey: `sk_UE${generateApiKey()}`,
+          publicKey: `pk_UE${generateApiKey()}`,
+          userId: newUser.id,
+        },
+      });
+
+      const authToken = await createAuthToken(newUser.id);
+      return redirect("/dashboard", {
+        headers: [
+          [
+            "Set-Cookie",
+            `unecho.auth-token=${authToken}; HttpOnly; Path=/; Max-Age=${dayjs()
+              .add(90, "days")
+              .unix()}`,
+          ],
+        ],
       });
     } else {
       return json({ message: "Unauthorized" }, { status: 401 });
