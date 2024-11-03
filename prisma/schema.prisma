@@ -1,0 +1,56 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String    @id @default(uuid())
+  name      String
+  email     String    @unique
+  createdAt DateTime  @default(now())
+  projects  Project[]
+}
+
+model Project {
+  id          String     @id @default(uuid())
+  name        String
+  description String?
+  createdAt   DateTime   @default(now())
+  userId      String
+  publicKey   String     @unique
+  secretKey   String     @unique
+  feedbacks   Feedback[]
+  user        User       @relation(fields: [userId], references: [id])
+}
+
+model Feedback {
+  id                String             @id @default(uuid())
+  content           String
+  sentiment         Sentiment
+  score             Float
+  createdAt         DateTime           @default(now())
+  projectId         String
+  clientUserId      String?
+  clientUserProfile ClientUserProfile? @relation(fields: [clientUserId], references: [id])
+  project           Project            @relation(fields: [projectId], references: [id])
+}
+
+model ClientUserProfile {
+  id        String     @id @default(uuid())
+  name      String?
+  email     String
+  createdAt DateTime   @default(now())
+  avatar    String?
+  profileId String?
+  feedbacks Feedback[]
+}
+
+enum Sentiment {
+  positive
+  negative
+  neutral
+}
