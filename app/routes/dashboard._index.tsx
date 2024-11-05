@@ -30,44 +30,15 @@ import { getUserIdFromToken } from "~/lib/auth";
 import { getCookie } from "~/lib/cookies";
 import { getFeedbackSentimentData } from "~/services/analytics/getFeedbackSentimentData";
 import { getWeeklyFeedbackChartData } from "~/services/analytics/getWeeklyFeedbackChartData";
+import { getRecentFeedback } from "~/services/feedback/getRecentFeedback";
 
-const recentFeedback = [
-  {
-    id: 1,
-    user: "Alice",
-    sentiment: "Positive",
-    feedback: "The new feature is amazing!",
-    date: "2023-06-15",
-  },
-  {
-    id: 2,
-    user: "Bob",
-    sentiment: "Neutral",
-    feedback: "It works fine, but could be improved.",
-    date: "2023-06-14",
-  },
-  {
-    id: 3,
-    user: "Charlie",
-    sentiment: "Negative",
-    feedback: "I encountered a bug in the latest update.",
-    date: "2023-06-13",
-  },
-  {
-    id: 4,
-    user: "Diana",
-    sentiment: "Positive",
-    feedback: "Customer support was very helpful.",
-    date: "2023-06-12",
-  },
-  {
-    id: 5,
-    user: "Eve",
-    sentiment: "Neutral",
-    feedback: "The interface is okay, but a bit confusing.",
-    date: "2023-06-11",
-  },
-];
+interface RecentFeedback {
+  id: string;
+  user: string;
+  sentiment: string;
+  feedback: string;
+  date: string;
+}
 
 export const loader: LoaderFunction = async ({ request }) => {
   const projectId = getCookie(request, "unecho.project-id")!;
@@ -76,12 +47,17 @@ export const loader: LoaderFunction = async ({ request }) => {
 
   const stat = await getFeedbackSentimentData(projectId, userId);
   const chartData = await getWeeklyFeedbackChartData(projectId, userId);
+  const recentFeedback = await getRecentFeedback(projectId, userId);
 
-  return json({ stat, chartData });
+  return json({ stat, chartData, recentFeedback });
 };
 
 const DashboardIndex = () => {
-  const { stat, chartData } = useLoaderData<typeof loader>();
+  const { stat, chartData, recentFeedback } = useLoaderData<{
+    stat: any;
+    chartData: any;
+    recentFeedback: RecentFeedback[];
+  }>();
 
   return (
     <div>
@@ -199,9 +175,9 @@ const DashboardIndex = () => {
                     <TableCell>
                       <span
                         className={`inline-block px-2 py-1 text-xs font-semibold rounded-full ${
-                          feedback.sentiment === "Positive"
+                          feedback.sentiment === "positive"
                             ? "bg-green-100 text-green-800"
-                            : feedback.sentiment === "Neutral"
+                            : feedback.sentiment === "neutral"
                             ? "bg-yellow-100 text-yellow-800"
                             : "bg-red-100 text-red-800"
                         }`}
