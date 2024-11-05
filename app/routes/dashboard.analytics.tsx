@@ -24,26 +24,114 @@ import {
 } from "~/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import AppHeader from "~/components/app-header";
-import { MetaFunction } from "@remix-run/react";
+import { json, MetaFunction, useLoaderData } from "@remix-run/react";
+import { LoaderFunction } from "@remix-run/node";
+import { getCookie } from "~/lib/cookies";
+import { getUserIdFromToken } from "~/lib/auth";
+import { prisma } from "prisma/client";
+import dayjs from "dayjs";
 
-const sentimentTrendData = [
-  { name: "Week 1", positive: 65, neutral: 25, negative: 10 },
-  { name: "Week 2", positive: 60, neutral: 30, negative: 10 },
-  { name: "Week 3", positive: 70, neutral: 20, negative: 10 },
-  { name: "Week 4", positive: 75, neutral: 15, negative: 10 },
-];
+export const loader: LoaderFunction = async ({ request }) => {
+  const projectId = getCookie(request, "unecho.project-id")!;
+  const userToken = getCookie(request, "unecho.auth-token")!;
+  const userId = getUserIdFromToken(userToken)!;
 
-const feedbackVolumeData = [
-  { name: "Mon", volume: 120 },
-  { name: "Tue", volume: 150 },
-  { name: "Wed", volume: 180 },
-  { name: "Thu", volume: 190 },
-  { name: "Fri", volume: 160 },
-  { name: "Sat", volume: 140 },
-  { name: "Sun", volume: 130 },
-];
+  const whereCondition = { projectId, project: { userId } };
+
+  const totalFeedbacks = await prisma.feedback.count({
+    where: whereCondition,
+  });
+
+  const averageSentimentScore = await prisma.feedback.aggregate({
+    where: whereCondition,
+    _avg: {
+      score: true,
+    },
+  });
+
+  const startOfWeek = dayjs().startOf("week").toDate();
+  const endOfWeek = dayjs().endOf("week").toDate();
+  const feedbacksThisWeek = await prisma.feedback.findMany({
+    where: {
+      ...whereCondition,
+      createdAt: {
+        gte: startOfWeek,
+        lte: endOfWeek,
+      },
+    },
+  });
+  const feedbackVolumeData = Array.from({ length: 7 }, (_, i) => {
+    const day = dayjs(startOfWeek).add(i, "day");
+    const count = feedbacksThisWeek.filter((feedback) =>
+      dayjs(feedback.createdAt).isSame(day, "day")
+    ).length;
+
+    return {
+      name: day.format("ddd"),
+      volume: count,
+    };
+  });
+
+  const startOfMonth = dayjs().startOf("month");
+  const daysInMonth = startOfMonth.daysInMonth();
+
+  const sentimentTrendData = await Promise.all(
+    Array.from({ length: daysInMonth }, async (_, i) => {
+      const dayStart = startOfMonth.add(i, "day").startOf("day").toDate();
+      const dayEnd = startOfMonth.add(i, "day").endOf("day").toDate();
+
+      const dailyFeedbackCounts = await prisma.feedback.groupBy({
+        by: ["sentiment"],
+        where: {
+          ...whereCondition,
+          createdAt: {
+            gte: dayStart,
+            lte: dayEnd,
+          },
+        },
+        _count: {
+          sentiment: true,
+        },
+      });
+
+      const sentimentData = {
+        positive: 0,
+        neutral: 0,
+        negative: 0,
+      };
+
+      dailyFeedbackCounts.forEach(({ sentiment, _count }) => {
+        if (sentiment === "positive") sentimentData.positive = _count.sentiment;
+        else if (sentiment === "neutral")
+          sentimentData.neutral = _count.sentiment;
+        else if (sentiment === "negative")
+          sentimentData.negative = _count.sentiment;
+      });
+
+      return {
+        day: (i + 1).toString(),
+        ...sentimentData,
+      };
+    })
+  );
+
+  return json({
+    stat: {
+      feedback: {
+        value: totalFeedbacks,
+      },
+      sentimentScore: {
+        value: averageSentimentScore._avg.score?.toFixed(1),
+      },
+    },
+    feedbackVolumeData,
+    sentimentTrendData,
+  });
+};
 
 export default function AnalyticsPage() {
+  const { stat, feedbackVolumeData, sentimentTrendData } =
+    useLoaderData<typeof loader>();
   return (
     <div className="">
       <AppHeader title="Analytics" />
@@ -58,7 +146,7 @@ export default function AnalyticsPage() {
               <BarChart2 className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">1,234</div>
+              <div className="text-2xl font-bold">{stat.feedback.value}</div>
               <p className="text-xs text-muted-foreground">
                 +20.1% from last month
               </p>
@@ -72,7 +160,9 @@ export default function AnalyticsPage() {
               <TrendingUp className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">7.8</div>
+              <div className="text-2xl font-bold">
+                {stat.sentimentScore.value}
+              </div>
               <p className="text-xs text-muted-foreground">
                 +0.3 from last month
               </p>
@@ -107,7 +197,6 @@ export default function AnalyticsPage() {
             </CardContent>
           </Card>
         </div>
-        {/* Charts */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
           <Card>
             <CardHeader>
@@ -118,7 +207,7 @@ export default function AnalyticsPage() {
               <div className="h-[300px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={sentimentTrendData}>
-                    <XAxis dataKey="name" />
+                    <XAxis dataKey="day" />
                     <YAxis />
                     <Tooltip />
                     <Legend />
