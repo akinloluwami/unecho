@@ -268,7 +268,7 @@ export default function AnalyticsPage() {
             </CardContent>
           </Card>
         </div>
-        <Card>
+        {/* <Card>
           <CardHeader>
             <CardTitle>Top Feedback</CardTitle>
             <CardDescription>Most impactful feedback received</CardDescription>
@@ -325,7 +325,7 @@ export default function AnalyticsPage() {
               </TabsContent>
             </Tabs>
           </CardContent>
-        </Card>
+        </Card> */}
       </div>
     </div>
   );
