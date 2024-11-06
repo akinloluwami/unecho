@@ -26,16 +26,13 @@ export default function SignupPage() {
 
   const handleGithubLogin = async () => {
     setIsLoading(true);
-
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-    setIsLoading(false);
-
-    console.log("GitHub login initiated");
+    const githubClientId = "Ov23liqBAP1Ll3kYfEAB";
+    window.location.href = `https://github.com/login/oauth/authorize?client_id=${githubClientId}&scope=user:email`;
   };
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <Card className="w-full max-w-md">
+      <Card className="w-full max-w-sm">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold text-center">
             Create an account
