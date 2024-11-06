@@ -10,6 +10,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  useSidebar,
 } from "~/components/ui/sidebar";
 
 const items = [
@@ -37,6 +38,7 @@ const items = [
 
 export function AppSidebar() {
   const location = useLocation();
+  const { toggleSidebar } = useSidebar();
   return (
     <Sidebar>
       <SidebarContent>
@@ -50,6 +52,7 @@ export function AppSidebar() {
                     asChild
                     isActive={item.url === location.pathname}
                     size="lg"
+                    onClick={toggleSidebar}
                   >
                     <Link to={item.url} viewTransition>
                       <item.icon className="text-accent-base" />
