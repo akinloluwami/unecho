@@ -261,7 +261,7 @@ export default function AnalyticsPage() {
                     <XAxis dataKey="name" />
                     <YAxis />
                     <Tooltip />
-                    <Bar dataKey="volume" fill="#3b82f6" />
+                    <Bar dataKey="volume" fill="#49B6FF" />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
