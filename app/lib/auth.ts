@@ -1,4 +1,5 @@
 import jwt from "jsonwebtoken";
+import { getCookie } from "./cookies";
 
 const JWT_SECRET = process.env.JWT_SECRET!;
 const JWT_EXPIRES_IN = "90d";
@@ -22,4 +23,12 @@ export const getUserIdFromToken = (token: string): string | null => {
     console.error("Error verifying token:", error);
     return null;
   }
+};
+
+export const getUserId = (request: Request) => {
+  return getUserIdFromToken(getCookie(request, "unecho.auth-token")!)!;
+};
+
+export const getProjectId = (request: Request) => {
+  return getCookie(request, "unecho.project-id")!;
 };
