@@ -1,6 +1,5 @@
 import { LoaderFunction, json } from "@remix-run/node";
-import { MetaFunction, useLoaderData } from "@remix-run/react";
-import { prisma } from "prisma/client";
+import { Link, MetaFunction, useLoaderData } from "@remix-run/react";
 import {
   Legend,
   Line,
@@ -26,8 +25,7 @@ import {
   TableHeader,
   TableRow,
 } from "~/components/ui/table";
-import { getUserIdFromToken } from "~/lib/auth";
-import { getCookie } from "~/lib/cookies";
+import { getProjectId, getUserId } from "~/lib/auth";
 import { getFeedbackSentimentData } from "~/services/analytics/getFeedbackSentimentData";
 import { getWeeklyFeedbackChartData } from "~/services/analytics/getWeeklyFeedbackChartData";
 import { getRecentFeedback } from "~/services/feedback/getRecentFeedback";
@@ -41,9 +39,8 @@ interface RecentFeedback {
 }
 
 export const loader: LoaderFunction = async ({ request }) => {
-  const projectId = getCookie(request, "unecho.project-id")!;
-  const userToken = getCookie(request, "unecho.auth-token")!;
-  const userId = getUserIdFromToken(userToken)!;
+  const projectId = getProjectId(request);
+  const userId = getUserId(request);
 
   const stat = await getFeedbackSentimentData(projectId, userId);
   const chartData = await getWeeklyFeedbackChartData(projectId, userId);
@@ -153,10 +150,15 @@ const DashboardIndex = () => {
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle>Recent Feedback</CardTitle>
-            <CardDescription>
-              Latest user feedback and sentiments
-            </CardDescription>
+            <div className="flex justify-between">
+              <div className="">
+                <CardTitle>Recent Feedback</CardTitle>
+                <CardDescription>
+                  Latest user feedback and sentiments
+                </CardDescription>
+              </div>
+              <Link to="/dashboard/feedback">View all</Link>
+            </div>
           </CardHeader>
           <CardContent>
             <Table>
@@ -164,7 +166,7 @@ const DashboardIndex = () => {
                 <TableRow>
                   <TableHead>User</TableHead>
                   <TableHead>Sentiment</TableHead>
-                  <TableHead>Feedback</TableHead>
+                  {/* <TableHead>Feedback</TableHead> */}
                   <TableHead>Date</TableHead>
                 </TableRow>
               </TableHeader>
@@ -185,7 +187,7 @@ const DashboardIndex = () => {
                         {feedback.sentiment}
                       </span>
                     </TableCell>
-                    <TableCell>{feedback.feedback}</TableCell>
+                    {/* <TableCell>{feedback.feedback}</TableCell> */}
                     <TableCell>{feedback.date}</TableCell>
                   </TableRow>
                 ))}
