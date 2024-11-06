@@ -38,7 +38,7 @@ const items = [
 
 export function AppSidebar() {
   const location = useLocation();
-  const { toggleSidebar } = useSidebar();
+  const { setOpenMobile } = useSidebar();
   return (
     <Sidebar>
       <SidebarContent>
@@ -52,7 +52,7 @@ export function AppSidebar() {
                     asChild
                     isActive={item.url === location.pathname}
                     size="lg"
-                    onClick={toggleSidebar}
+                    onClick={() => setOpenMobile(false)}
                   >
                     <Link to={item.url} viewTransition>
                       <item.icon className="text-accent-base" />
