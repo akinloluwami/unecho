@@ -115,13 +115,56 @@ export const loader: LoaderFunction = async ({ request }) => {
     })
   );
 
+  const startOfLastMonth = dayjs()
+    .subtract(1, "month")
+    .startOf("month")
+    .toDate();
+  const endOfLastMonth = dayjs().subtract(1, "month").endOf("month").toDate();
+
+  const lastMonthTotalFeedbacks = await prisma.feedback.count({
+    where: {
+      ...whereCondition,
+      createdAt: {
+        gte: startOfLastMonth,
+        lte: endOfLastMonth,
+      },
+    },
+  });
+
+  const lastMonthAverageSentimentScore = await prisma.feedback.aggregate({
+    where: {
+      ...whereCondition,
+      createdAt: {
+        gte: startOfLastMonth,
+        lte: endOfLastMonth,
+      },
+    },
+    _avg: {
+      score: true,
+    },
+  });
+
+  const feedbackChangePercentage =
+    lastMonthTotalFeedbacks > 0
+      ? ((totalFeedbacks - lastMonthTotalFeedbacks) / lastMonthTotalFeedbacks) *
+        100
+      : 0;
+
+  const sentimentScoreChange =
+    lastMonthAverageSentimentScore._avg.score !== null
+      ? (averageSentimentScore._avg.score ?? 0) -
+        lastMonthAverageSentimentScore._avg.score
+      : 0;
+
   return json({
     stat: {
       feedback: {
         value: totalFeedbacks,
+        changePercentage: feedbackChangePercentage.toFixed(1),
       },
       sentimentScore: {
         value: averageSentimentScore._avg.score?.toFixed(1),
+        change: sentimentScoreChange.toFixed(1),
       },
     },
     feedbackVolumeData,
@@ -148,7 +191,7 @@ export default function AnalyticsPage() {
             <CardContent>
               <div className="text-2xl font-bold">{stat.feedback.value}</div>
               <p className="text-xs text-muted-foreground">
-                +20.1% from last month
+                {stat.feedback.changePercentage}% from last month
               </p>
             </CardContent>
           </Card>
@@ -164,35 +207,7 @@ export default function AnalyticsPage() {
                 {stat.sentimentScore.value}
               </div>
               <p className="text-xs text-muted-foreground">
-                +0.3 from last month
-              </p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                Response Rate
-              </CardTitle>
-              <PieChartIcon className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">92%</div>
-              <p className="text-xs text-muted-foreground">
-                +2% from last month
-              </p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                Avg. Response Time
-              </CardTitle>
-              <Calendar className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">4h 32m</div>
-              <p className="text-xs text-muted-foreground">
-                -12m from last month
+                {stat.sentimentScore.change} from last month
               </p>
             </CardContent>
           </Card>
