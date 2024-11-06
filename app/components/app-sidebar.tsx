@@ -52,7 +52,7 @@ export function AppSidebar() {
                     size="lg"
                   >
                     <Link to={item.url} viewTransition>
-                      <item.icon />
+                      <item.icon className="text-accent-base" />
                       <span>{item.title}</span>
                     </Link>
                   </SidebarMenuButton>
