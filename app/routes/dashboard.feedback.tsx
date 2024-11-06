@@ -116,7 +116,7 @@ const Feedback = () => {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Card>
           <CardHeader>
-            <div className="flex justify-between items-center">
+            <div className="flex justify-between items-center flex-wrap gap-3">
               <div>
                 <CardTitle>Feedback Entries</CardTitle>
                 <CardDescription>View and manage user feedback</CardDescription>
@@ -164,7 +164,7 @@ const Feedback = () => {
                           <AvatarFallback>
                             {feedback.user.charAt(0) ||
                               feedback.email.charAt(0) ||
-                              "-"}
+                              ""}
                           </AvatarFallback>
                         </Avatar>
                         <div>
@@ -192,7 +192,9 @@ const Feedback = () => {
                     <TableCell className="max-w-sm truncate">
                       {feedback.feedback}
                     </TableCell>
-                    <TableCell>{feedback.date}</TableCell>
+                    <TableCell className="whitespace-nowrap">
+                      {feedback.date}
+                    </TableCell>
                     <TableCell>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
@@ -210,7 +212,7 @@ const Feedback = () => {
                                 View Details
                               </DropdownMenuItem>
                             </DialogTrigger>
-                            <DialogContent className="sm:max-w-[500px]">
+                            <DialogContent className="lg:max-w-[500px] w-[90%] rounded-md">
                               <DialogHeader>
                                 <DialogTitle>Feedback Details</DialogTitle>
                                 <DialogDescription>
@@ -267,10 +269,10 @@ const Feedback = () => {
                               </div>
                             </DialogContent>
                           </Dialog>
-                          <DropdownMenuSeparator />
+                          {/* <DropdownMenuSeparator />
                           <DropdownMenuItem className="text-red-600">
                             Delete
-                          </DropdownMenuItem>
+                          </DropdownMenuItem> */}
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </TableCell>
