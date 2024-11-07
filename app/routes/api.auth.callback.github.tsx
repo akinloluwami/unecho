@@ -49,7 +49,7 @@ export const loader: LoaderFunction = async ({ request }) => {
     }
 
     const newUser = await prisma.user.create({
-      data: { email, name: user.name || "" },
+      data: { email, name: user.name || "", signupVia: "github" },
     });
     userId = newUser.id;
 
