@@ -14,9 +14,11 @@ import {
 
 export default function SignupPage() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [selectedService, setSelectedService] = useState("");
 
   const handleGoogleLogin = async () => {
     setIsLoading(true);
+    setSelectedService("google");
 
     await new Promise((resolve) => setTimeout(resolve, 2000));
     setIsLoading(false);
@@ -26,6 +28,8 @@ export default function SignupPage() {
 
   const handleGithubLogin = async () => {
     setIsLoading(true);
+    setSelectedService("github");
+
     const githubClientId = "Ov23liqBAP1Ll3kYfEAB";
     window.location.href = `https://github.com/login/oauth/authorize?client_id=${githubClientId}&scope=user:email`;
   };
@@ -47,7 +51,7 @@ export default function SignupPage() {
             onClick={handleGoogleLogin}
             disabled={isLoading}
           >
-            {isLoading ? (
+            {isLoading && selectedService === "google" ? (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             ) : (
               <SiGoogle className="mr-2 h-4 w-4" />
@@ -59,7 +63,7 @@ export default function SignupPage() {
             onClick={handleGithubLogin}
             disabled={isLoading}
           >
-            {isLoading ? (
+            {isLoading && selectedService === "github" ? (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             ) : (
               <SiGithub className="mr-2 h-4 w-4" />
