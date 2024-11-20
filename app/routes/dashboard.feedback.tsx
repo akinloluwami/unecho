@@ -168,7 +168,9 @@ const Feedback = () => {
                           </AvatarFallback>
                         </Avatar>
                         <div>
-                          <div className="font-medium">{feedback.user}</div>
+                          <div className="font-medium">
+                            {feedback.user || "Anonymous"}
+                          </div>
                           <div className="text-sm text-gray-500">
                             {feedback.email}
                           </div>
