@@ -43,7 +43,7 @@ export function AppSidebar() {
     <Sidebar>
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Application</SidebarGroupLabel>
+          <SidebarGroupLabel>UnEcho</SidebarGroupLabel>
           <SidebarGroupContent className="mt-10">
             <SidebarMenu>
               {items.map((item) => (
