@@ -173,7 +173,7 @@ const DashboardIndex = () => {
               <TableBody>
                 {recentFeedback.map((feedback) => (
                   <TableRow key={feedback.id}>
-                    <TableCell>{feedback.user}</TableCell>
+                    <TableCell>{feedback.user || "Anonymous"}</TableCell>
                     <TableCell>
                       <span
                         className={`inline-block px-2 py-1 text-xs font-semibold rounded-full ${
