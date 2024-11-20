@@ -94,25 +94,40 @@ export const getFeedbackSentimentData = async (
     },
   });
 
-  const lastWeekCounts = sentimentsLastWeek.reduce(
-    (acc, sentimentData) => {
-      acc[sentimentData.sentiment] = sentimentData._count.sentiment;
+  const defaultSentiments = ["positive", "negative", "neutral"];
+
+  const lastWeekCounts = defaultSentiments.reduce(
+    (acc, sentiment) => {
+      const sentimentData = sentimentsLastWeek.find(
+        (data) => data.sentiment === sentiment
+      );
+      acc[sentiment] = sentimentData ? sentimentData._count.sentiment : 0;
       return acc;
     },
     {} as Record<string, number>
   );
 
-  const sentimentData = sentimentsThisWeek.map((sentimentData) => {
+  const sentimentData = defaultSentiments.map((sentiment) => {
+    const thisWeekData = sentimentsThisWeek.find(
+      (data) => data.sentiment === sentiment
+    );
+    const thisWeekCount = thisWeekData ? thisWeekData._count.sentiment : 0;
+
     const thisWeekPercentage =
-      (sentimentData._count.sentiment / totalFeedbackCountThisWeek) * 100;
-    const lastWeekCount = lastWeekCounts[sentimentData.sentiment] || 0;
+      totalFeedbackCountThisWeek > 0
+        ? (thisWeekCount / totalFeedbackCountThisWeek) * 100
+        : 0;
+
+    const lastWeekCount = lastWeekCounts[sentiment];
     const lastWeekPercentage =
-      (lastWeekCount / totalFeedbackCountLastWeek) * 100;
+      totalFeedbackCountLastWeek > 0
+        ? (lastWeekCount / totalFeedbackCountLastWeek) * 100
+        : 0;
 
     const percentageChange = thisWeekPercentage - lastWeekPercentage;
 
     return {
-      sentiment: sentimentData.sentiment,
+      sentiment,
       percentage: parseFloat(thisWeekPercentage.toFixed(2)),
       changeFromLastWeek: parseFloat(percentageChange.toFixed(2)),
     };
